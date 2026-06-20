@@ -53,8 +53,6 @@ in {
 
     installInstructions = ./install-instructions-cuda.json;
 
-    requirementsFileName = "requirements.txt";
-
     inherit createPackage;
   };
 }

@@ -38,7 +38,7 @@ let
   
   additionalRequirements = [
     # Usually installed when launching the WebUI
-    { name = "clip"; spec = "https://github.com/openai/CLIP/archive/d50d76daa670286dd6cacf3bcd80b5e4823fc8e1.zip"; }
+    { name = "clip"; spec = "https://github.com/openai/CLIP/archive/d05afc436d78f1c48dc0dbf8e5980a9d471f35f6.zip"; }
 
     # Required by the stable diffusion model, no idea where it comes from usually
     { name = "timm"; spec = "0.9.16"; }
@@ -60,8 +60,8 @@ stdenv.mkDerivation {
   src = fetchFromGitHub {
     owner = "lllyasviel";
     repo = "stable-diffusion-webui-forge";
-    rev = "dfdcbab685e57677014f05a3309b48cc87383167";
-    hash = "sha256-MQta/wigoWIGZB5i6j7bjipKo2Uab4j3msfLHT7YfSs=";
+    rev = "ab9c2e2b2741c549092b8e4e5fa2b0d9aed838ce";
+    hash = "sha256-aE3P6NNJeZfz1e8cx645COb8X/kHWFTBrh4FQO99w+o=";
   };
 
   patches = [

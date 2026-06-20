@@ -77,6 +77,23 @@ rec {
     };
   });
 
+  # For some reason this ships a wheel... with source code, but no setup.py
+  scikit-image = (prev.scikit-image.overridePythonAttrs (prevPyAttrs: {
+    build-system = prevPyAttrs.build-system ++ [
+      pythonPkgs.meson-python
+      pythonPkgs.cython
+      pythonPkgs.pythran
+    ];
+
+    format = "pyproject";
+  })).overrideAttrs (prev: {
+    postPatch = ''
+      for f in skimage/_build_utils/*.py; do
+        patchShebangs $f
+      done
+    '';
+  });
+
   # A bunch of packages require zlib
   llvmlite = withZlib prev.llvmlite;
   tokenizers = withZlib prev.tokenizers;

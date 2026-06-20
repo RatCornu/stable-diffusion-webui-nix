@@ -9,19 +9,25 @@ let
     , python
     , createPackage
     , additionalRequirements ? []
+    , additionalBuildRequirements ? []
+    , additionalBuildInputs ? []
     , additionalPipArgs ? []
     , installInstructions
-    , requirementsFileName ? "requirements_versions.txt"
+    , requirementsFileName ? "requirements.txt"
   }@args: {
     type = "stable-diffusion-webui-derivation";
 
     # So the defaults propagate...
     inherit additionalPipArgs;
     inherit additionalRequirements;
+    inherit additionalBuildRequirements;
+    inherit additionalBuildInputs;
     inherit requirementsFileName;
   } // args;
-in
-{
-  forge = pkgs.callPackage ./forge { inherit mkWebuiDistrib; };
+in rec {
+  # forge conflicts with some nixpkgs name, but this flake previously
+  # used that name, so alias it.
+  forge = forge-webui;
+  forge-webui = pkgs.callPackage ./forge { inherit mkWebuiDistrib; };
   comfy = pkgs.callPackage ./comfy { inherit mkWebuiDistrib; };
 }

@@ -44,11 +44,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1751898758,
-        "narHash": "sha256-8EmTPdfOymvvHhmHYWiyO3cwZ4gtLo5uBFm3CU5vySo=",
+        "lastModified": 1781966469,
+        "narHash": "sha256-eiutOMe7C7BkkTmuO2Vogmhml2f2opSOzIRuvez23rA=",
         "owner": "Janrupf",
         "repo": "python-flexseal",
-        "rev": "af318e1fd047abbefcc68d0292a4d902179c95fe",
+        "rev": "d09ac6b31da0aa82b6b86d4577a6d0032715a2ce",
         "type": "github"
       },
       "original": {

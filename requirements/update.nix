@@ -31,69 +31,81 @@ let
     (map requirementToPip (webuiPkgs.additionalRequirements or [])) ++
     webuiPkgs.additionalPipArgs
   );
-in
-pkgs.writeShellScriptBin "stable-diffusion-webui-update-requirements" ''
-  set -e
 
-  if [[ $# -ne 1 ]]; then
-    echo "Usage: $0 <install-instructions.json>" >&2
-    exit 1
-  fi
+  additionalBuildRequirements = lib.strings.escapeShellArgs (
+    map requirementToPip (webuiPkgs.additionalBuildRequirements or [])
+  );
+in pkgs.writeShellApplication {
+  name = "stable-diffusion-webui-update-requirements";
+  runtimeInputs = (webuiPkgs.additionalBuildInputs or []);
+  text = ''
+    set -e
 
-  output="$(realpath "$1")"
+    if [[ $# -ne 1 ]]; then
+      echo "Usage: $0 <install-instructions.json>" >&2
+      exit 1
+    fi
 
-  echo "Stable diffusion repository is at ${webuiPkgs.source}"
+    export LD_LIBRARY_PATH=''${LD_LIBRARY_PATH:+LD_LIBRARY_PATH:}:${pkgs.lib.makeLibraryPath webuiPkgs.additionalBuildInputs}
+    echo "Using library path $LD_LIBRARY_PATH"
 
-  temporary_dir="$(mktemp -d)"
-  cd "$temporary_dir"
+    output="$(realpath "$1")"
 
-  download_dir="$temporary_dir/downloads"
-  cache_dir="$temporary_dir/cache"
-  env_dir="$temporary_dir/venv"
-  requirement_files=("${webuiPkgs.source}/${webuiPkgs.requirementsFileName}")
+    echo "Stable diffusion repository is at ${webuiPkgs.source}"
 
-  echo "Creating virtual environment in $env_dir"
-  ${basic-python}/bin/python -m venv "$env_dir"
-  
-  source "$env_dir/bin/activate"
+    temporary_dir="$(mktemp -d)"
+    cd "$temporary_dir"
 
-  echo "Temporarily installing wheel..."
-  python -m pip install wheel
+    cache_dir="$temporary_dir/cache"
+    env_dir="$temporary_dir/venv"
+    requirement_files=("${webuiPkgs.source}/${webuiPkgs.requirementsFileName}")
 
-  echo "Installing dependencies..."
+    echo "Creating virtual environment in $env_dir"
+    ${basic-python}/bin/python -m venv "$env_dir"
 
-  declare -a pip_requirement_files
+    # shellcheck disable=1091
+    source "$env_dir/bin/activate"
 
-  for f in $requirement_files; do
-    echo "  Adding requirement file $f"
-    pip_requirement_files+=("-r" "$f")
-  done
+    ${pkgs.lib.optionalString (lib.length webuiPkgs.additionalBuildRequirements != 0)
+      ''
+        echo "Temporarily installing build requirements..."
+        python -m pip install ${additionalBuildRequirements}
+      ''
+    }
 
-  for package_name in "''${!additional_requirements[@]}"; do
-    pip_spec="$(to_pip_spec "$package_name")"
-    echo "  Adding additional requirement $pip_spec to pip"
-    pip_requirements_extra+=("$pip_spec")
-  done
+    echo "Installing dependencies..."
 
-  # Install everything with one pip install invocation - this ensures the dependency resolver
-  # works correctly
-  python -m pip install \
-    --dry-run \
-    --ignore-installed \
-    --report install-report.json \
-    "''${pip_requirement_files[@]}" \
-    --cache-dir "$cache_dir" \
-    ${additionalPipArgs}
+    declare -a pip_requirement_files
 
-  echo "Removing wheel.."
-  python -m pip uninstall -y wheel
+    for f in "''${requirement_files[@]}"; do
+      echo "  Adding requirement file $f"
+      pip_requirement_files+=("-r" "$f")
+    done
 
-  deactivate
+    # Install everything with one pip install invocation - this ensures the dependency resolver
+    # works correctly
+    python -m pip install \
+      --dry-run \
+      --ignore-installed \
+      --report install-report.json \
+      "''${pip_requirement_files[@]}" \
+      --cache-dir "$cache_dir" \
+      ${additionalPipArgs}
 
-  echo "Sealing environment from install report"
+    ${pkgs.lib.optionalString (lib.length webuiPkgs.additionalBuildRequirements != 0)
+      ''
+        echo "Removing build requirements.."
+        python -m pip uninstall -y ${additionalBuildRequirements}
+      ''
+    }
 
-  ${python-flexseal}/bin/python-flexseal -p install-report.json -o "$output"
+    deactivate
 
-  echo "Written json to $output"
-  rm -rf "$temporary_dir"
-''
+    echo "Sealing environment from install report"
+
+    ${python-flexseal}/bin/python-flexseal -p install-report.json -o "$output"
+
+    echo "Written json to $output"
+    rm -rf "$temporary_dir"
+  '';
+}
