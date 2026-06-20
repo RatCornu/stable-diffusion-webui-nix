@@ -94,9 +94,9 @@ rec {
     libGL
     glib
 
-    xorg.libxcb
-    xorg.libICE
-    xorg.libSM
+    libxcb
+    libice
+    libsm
   ];
 
   # Cuda stuff
@@ -238,11 +238,7 @@ rec {
       pkgs.rdma-core
     ]
   );
-  nvidia-cudnn-cu13 = propagateLib (
-    withExtraDependencies prev.nvidia-cudnn-cu13 [
-      pkgs.libz
-    ]
-  );
+  nvidia-cudnn-cu13 = propagateLib (withZlib prev.nvidia-cudnn-cu13);
   nvidia-nccl-cu13 = propagateLib prev.nvidia-nccl-cu13;
 
 
