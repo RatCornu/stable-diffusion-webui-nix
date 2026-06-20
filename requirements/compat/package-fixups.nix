@@ -143,14 +143,30 @@ rec {
 
   bitsandbytes = (
     prev.bitsandbytes.overridePythonAttrs (prev: {
-      # Available at runtime if, and only if, CUDA is loaded -
+      # Available at runtime if, and only if, CUDA/ROCm/XPU is loaded -
       # but also only required if its loaded either way, so we
       # ignore these dependencies
       autoPatchelfIgnoreMissingDeps = [
         "libcudart.so.11.0"
         "libcublas.so.11"
+        "libcublas.so.12"
         "libcusparse.so.11"
         "libcublasLt.so.11"
+        "libcublasLt.so.12"
+        "libnvJitLink.so.12"
+
+        "libhipblas.so.2"
+        "libhipblas.so.3"
+        "libhipsparse.so.1"
+        "libhipsparse.so.4"
+        "libhipblaslt.so.0"
+        "libhipblaslt.so.1"
+        
+        "libsvml.so"
+        "libirng.so"
+        "libimf.so"
+        "libintlc.so.5"
+        "libsycl.so.8"
       ];
     })
   );
@@ -195,6 +211,40 @@ rec {
       pkgs.rdma-core
     ]
   );
+
+  # Cuda 13 (with inconsistent naming for some reason)
+  nvidia-nvjitlink = propagateLib prev.nvidia-nvjitlink;
+  nvidia-cusparse = propagateLib prev.nvidia-cusparse;
+  nvidia-cublas = propagateLib prev.nvidia-cublas;
+  nvidia-cufile = propagateLib (
+    withExtraDependencies prev.nvidia-cufile [
+      pkgs.rdma-core
+    ]
+  );
+  nvidia-cuda-cupti = propagateLib prev.nvidia-cuda-cupti;
+  nvidia-cuda-nvrtc = propagateLib prev.nvidia-cuda-nvrtc;
+  nvidia-cuda-runtime = propagateLib prev.nvidia-cuda-runtime;
+  nvidia-cufft = propagateLib prev.nvidia-cufft;
+  nvidia-cusolver = propagateLib prev.nvidia-cusolver;
+  nvidia-curand = propagateLib prev.nvidia-curand;
+  
+  nvidia-cusparselt-cu13 = propagateLib prev.nvidia-cusparselt-cu13;
+  nvidia-nvshmem-cu13 = propagateLib (
+    withExtraDependencies prev.nvidia-nvshmem-cu13 [
+      pkgs.libfabric
+      pkgs.ucx
+      pkgs.openmpi
+      pkgs.pmix
+      pkgs.rdma-core
+    ]
+  );
+  nvidia-cudnn-cu13 = propagateLib (
+    withExtraDependencies prev.nvidia-cudnn-cu13 [
+      pkgs.libz
+    ]
+  );
+  nvidia-nccl-cu13 = propagateLib prev.nvidia-nccl-cu13;
+
 
   # ROCm specific stuff
   pytorch-triton-rocm = withExtraDependencies prev.pytorch-triton-rocm [

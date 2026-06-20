@@ -9,10 +9,10 @@ let
     name = "ComfyUI";
 
     src = fetchFromGitHub {
-      owner = "comfyanonymous";
+      owner = "comfy-org";
       repo = "ComfyUI";
-      rev = "v0.3.57";
-      hash = "sha256-uqGqiPNGLM7rlyfNwRhXSqYQOiA11JGitF4RGNQowjc=";
+      rev = "v0.25.1";
+      hash = "sha256-wCszvmDR7wrmM5Yhl3jFEnqLTkmXZuPC5fTgiqugBG4=";
     };
 
     patches = [];
@@ -26,7 +26,7 @@ let
 in {
   cuda = mkWebuiDistrib {
     source = sourceDerivation;
-    python = pkgs.python312;
+    python = pkgs.python313;
 
     additionalRequirements = [
       # Required for most video extensions, common enough to be included
