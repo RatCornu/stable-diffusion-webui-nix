@@ -25,9 +25,9 @@
       libGL
       glib
 
-      xorg.libxcb
-      xorg.libICE
-      xorg.libSM
+      libxcb
+      libice
+      libsm
 
       ffmpeg_6
       sox
